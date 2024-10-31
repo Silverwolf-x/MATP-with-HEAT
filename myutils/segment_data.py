@@ -71,9 +71,9 @@ def main(command='default', file_path='', block_len=40, gap_between_seg=20, argc
         progress = 0
         print("Start\n")
         for folder in data_dir_list:
+            print("Handling folder {}\n".format(os.path.basename(folder)))
             main(command='dir', block_len=block_len, gap_between_seg=gap_len, argc=argv_len, file_path=folder)
             progress += 1
-            print("Handling folder {}\n".format(os.path.basename(folder)))
 
 
     # elif command.lower() == 'file':
@@ -114,14 +114,13 @@ def main(command='default', file_path='', block_len=40, gap_between_seg=20, argc
         else:
             # csv_list = [f.path for f in os.scandir(file_path) if f.is_file() and os.path.basename(f)[-4:] == '.csv' and os.path.basename(f).split('_')[0] == 'vehicle']
             csv_list = [f.path for f in os.scandir(file_path) if f.is_file() and os.path.basename(f)[-4:] == '.csv']
-            
             if len(csv_list) == 0:
                 print("No csv file found in "+file_path+', trying to check train and val folders...\n')
                 if os.path.exists(file_path+os.sep+'train'):
                     print('Train folder is found\n')
                     main(command='dir', block_len=block_len, gap_between_seg=gap_len, argc=argv_len, file_path=file_path+os.sep+'train')
                 if os.path.exists(file_path+os.sep+'val'):
-                    print('Train folder is found\n')
+                    print('Val folder is found\n')
                     main(command='dir', block_len=block_len, gap_between_seg=gap_len, argc=argv_len, file_path=file_path+os.sep+'val')
                 if not os.path.exists(file_path+os.sep+'train') and not os.path.exists(file_path+os.sep+'val'):
                     print('No csv files or train or val folders have been found\n')
@@ -129,9 +128,10 @@ def main(command='default', file_path='', block_len=40, gap_between_seg=20, argc
             
             else:
                 i = 0
-                for file in csv_list:
+                from tqdm import tqdm 
+                for file in tqdm(csv_list):
                     i += 1
-                    print("\tProgress: {:>4}/{:>4}".format(i, len(csv_list)), end='')
+                    # print("\tProgress: {:>4}/{:>4}".format(i, len(csv_list)), end='')
                     if not csv_header_check(file):
                         print("ERROR: csv header does not match the standard header => " + file)
                         continue

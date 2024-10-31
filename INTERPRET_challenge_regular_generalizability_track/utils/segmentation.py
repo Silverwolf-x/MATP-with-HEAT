@@ -88,7 +88,7 @@ def segmentation(csv_data, block_length=40, gap_between_seg=20, csv_path='', mod
 
     # all_segs = []
     vehicle_count = 0
-
+    
     for vehicle in vehicles_list:
         for i in range(len(data)):
             if data[i][2] == vehicle:
@@ -148,8 +148,8 @@ def segmentation(csv_data, block_length=40, gap_between_seg=20, csv_path='', mod
             cur_start_frame += gap_between_seg
         # all_segs.append(vehicle_segs)
         vehicle_count += 1
-        print("\r\tAgent Vehicle {:>5}/{:>5}".format(vehicle_count, len(vehicles_list)), end='')
-    print()
+        # print("\r\tAgent Vehicle {:>5}/{:>5}".format(vehicle_count, len(vehicles_list)), end='')
+    # print()
 
 
 def single_file(csv_file_path, block_length=40, gap_between_seg=20, dir_path=''):

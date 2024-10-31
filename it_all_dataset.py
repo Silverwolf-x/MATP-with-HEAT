@@ -26,7 +26,7 @@ class IT_ALL_MTP_dataset(Dataset):
 
         self.data_names=[]
         for s in self.scenario_names:
-            s_d_names = os.listdir('{}{}/{}'.format(self.data_path, s, self.data_split))
+            s_d_names = os.listdir(F'{self.data_path}{s}/{self.data_split}')
             s_d_names = ['{}{}/{}/{}'.format(self.data_path, s, self.data_split, d) for d in s_d_names]
             # print(len(s_d_names))
             self.data_names += s_d_names
@@ -41,8 +41,9 @@ class IT_ALL_MTP_dataset(Dataset):
         'Generates one sample of data'
         # Select sample
         ID = self.data_names[index]
-        # print(ID)
-        data_item = torch.load(osp.join(self.data_path, ID))
+        print(f'{ID=}')
+        print(f'{osp.join(self.data_path, ID)=}')
+        data_item = torch.load(osp.join(self.data_path, ID),weights_only=False)
         # tic = time.time()
         data_item.edge_attr = data_item.edge_attr.transpose(0,1)
         data_item.edge_type = data_item.edge_type.transpose(0,1)
@@ -65,8 +66,11 @@ class IT_ALL_MTP_dataset(Dataset):
 
 if __name__ == '__main__':
     import random
-    dataset = IT_ALL_MTP_dataset(data_path='/home/xy/heatmtp_it_data/', scenario_type='ALL', data_split='val')
-    print(dataset.__getitem__(random.randint(1, 40000)).veh_tar_mask)
+    # dataset = IT_ALL_MTP_dataset(data_path='/home/xy/heatmtp_it_data/', scenario_type='ALL', data_split='val')
+    from myutils.config import DATASET_DIR
+    dataset = IT_ALL_MTP_dataset(data_path=F'{DATASET_DIR}/', scenario_type='ALL', data_split='val')
+
+    print(dataset.__getitem__(random.randint(1, 400)).veh_tar_mask)
     print('there are {} data in this dataset'.format(dataset.__len__()))
     loader = DataLoader(dataset, batch_size=2, shuffle=False)
     # # print(dataset.__len__())

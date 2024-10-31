@@ -152,10 +152,10 @@ if __name__ == '__main__':
     ## Initialize optimizer 
     optimizer = torch.optim.Adam(train_net.parameters(),lr=0.001) 
     scheduler = MultiStepLR(optimizer, milestones=[1, 2, 4, 6], gamma=0.5)
-
-    full_train_set = IT_ALL_MTP_dataset(data_path='/home/xy/heatmtp_it_data/', 
+    
+    full_train_set = IT_ALL_MTP_dataset(data_path=f'{os.path.expanduser("~")}/heatmtp_it_data/', 
                                         scenario_type='ALL', data_split='train')
-    val_set = IT_ALL_MTP_dataset(data_path='/home/xy/heatmtp_it_data/', 
+    val_set = IT_ALL_MTP_dataset(data_path=f'{os.path.expanduser("~")}/heatmtp_it_data/', 
                                         scenario_type='ALL', data_split='val')
     
     torch.set_num_threads(4)

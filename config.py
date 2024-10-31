@@ -1,1 +1,0 @@
-DATAPATH='/home/sakura/MATP-with-HEAT/dataset/INTERACTION-Dataset-DR-multi-v1_2'

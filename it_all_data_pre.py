@@ -397,7 +397,7 @@ if __name__ == '__main__':
     import torch.multiprocessing
     torch.multiprocessing.set_sharing_strategy('file_system')
     
-    from config import DATAPATH
+    from . import DATASET_DIR
 
     # Parse arguments
     cmd_args = sys.argv[1:]

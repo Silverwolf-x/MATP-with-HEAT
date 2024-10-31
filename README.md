@@ -3,32 +3,47 @@
 ## 前言
 requirements的版本太老了，wheel编译会失败，换用最新的版本就行。python==3.10.15
 
-现在我们有几个文件夹在主目录~下并列，后两者是git clone我fork后的版本得到的
+现在我们有几个文件夹在主目录~下并列，后者是git clone我fork后的版本得到的
 ```
 ├── dataset
-│   ├── ...
-├── INTERPRET_challenge_regular_generalizability_track
-│   ├── ...
 ├── MATP-with-HEAT
+│   ├── INTERPRET_challenge_regular_generalizability_track
 │   ├── ...
 ```
 以下都以dataset/Multi-v1为示例，其他同理
 ## 预处理
 **INTERPRET_challenge_regular_generalizability_track** 目标：重新按frame_id排序得到sorted文件夹
+
 0. case_id处理说明
+
     本次处理中case_id是不规范的列，综合考虑如下因素：
+
     - INTERPRET_challenge_regular_generalizability_track代码中不允许包含case_id列
     - MATP-with-HEAT并没有提及case_id列
     - MATP-with-HEAT数据载入中的所有samples，是指所有scenario_names(如DR_CHN_Merging_ZS2)文件夹下的所有csv，详见IT_ALL_MTP_dataset函数定义
+    
     因此决定，将每个csv按照case_id拆分成若干个csv
 
 1. 重构文件夹
-    在`data_rebuilt_folder.sh`开头填写要运行的数据集地址，然后运行
+    在`myutils/data_rebuilt_folder.sh`开头填写要运行的数据集地址DATASET_DIR，然后运行
     ```cmd
     sh data_rebuilt_folder.sh
     ```
-    在数据集dataset/Multi-v1下生成符合input样式的`recorded_trackfiles`，复制到`INTERPRET_challenge_regular_generalizability_track`下
+    输出符合input样式的`recorded_trackfiles`，不动这个位置
 2. case_id处理
+    在`myutils/config.py`填写你要处理的某个数据集DIR地址，然后运行
+    `myutils/split_case.py`，如果要运行单个scenario或者全部scenario，改动变量`target_case_name`
+    输出拆分case后的文件的文件在`~/recorded_trackfiles`
+3. sorted
+    使用vscode的code runner运行，或者
+    ```cmd
+    python -u "/home/sakura/MATP-with-HEAT/myutils/segment_data.py"
+    ```
+    采用default指令的默认设置为block_len=40，gap_len=20，argv_len=0
+
+    运行`myutils/segment_data.py`
+    
+    
 
 
 ## 主程序

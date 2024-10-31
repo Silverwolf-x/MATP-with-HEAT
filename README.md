@@ -80,7 +80,7 @@ requirements的版本太老了，wheel编译会失败，换用最新的版本就
 
     例如,MATP-with-HEAT没有ZS0和ZS1的png，但有ZS。经过比对,dataset的ZS0和ZS1与MATP-with-HEAT/visualizations/map的ZS一模一样，因此多复制一个ZS0png
 
-1. 运行我更改后的data_pre_run.sh，它会自动读取上面$HOME/recorded_trackfiles/下的所有scenario进行处理，有tqdm进度条，开启多线程`num_pros = 8 if True else 1`也耗时非常长，至少几个小时
+1. 运行我更改后的data_pre_run.sh，它会自动读取上面$HOME/recorded_trackfiles/下的所有scenario进行处理，添加了tqdm进度条，开启多线程`num_pros = 8 if True else 1`也耗时非常长，至少几个小时
 
     输出处理后的文件在`~/heatmtp_it_data`下，包含MAP.pt和每个csv转换后的pyg
 
@@ -122,17 +122,21 @@ requirements的版本太老了，wheel编译会失败，换用最新的版本就
             True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True])
     ```
-3. 运行python it_all_train.py -m Heat，数据成功载入
+3. 运行`python it_all_train.py -m Heat`，数据成功载入
 
     剩下的就是model的维数对齐问题了
 
-    - RuntimeError: input.size(-1) must be equal to input_size. Expected 64, got 128
+    > RuntimeError: input.size(-1) must be equal to input_size. Expected 64, got 128
+    >
+    >    同步改args['encoder_size']和args['heat_in_channels_node']=128
 
-        同步改args['encoder_size']和args['heat_in_channels_node']=128
+    在`./it_all_models`输出log和模型
 
-    输出在./it_all_models输出log和模型
+    下面是成功训练的示例，这里只用了一小部分数据做测试
 
-    
+    ![nihao](./myutils/finish.jpg)
+
+
 ---
 
 # MATP-with-HEAT

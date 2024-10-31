@@ -63,6 +63,7 @@ requirements的版本太老了，wheel编译会失败，换用最新的版本就
 │   ├── INTERPRET_challenge_regular_generalizability_track
 │   ├── visualizations
 │       ├── map_png
+│       └── ...
 ├── recorded_trackfiles
 │   ├── DR_CHN_Merging_ZS0
 │   │   ├── train
@@ -79,19 +80,49 @@ requirements的版本太老了，wheel编译会失败，换用最新的版本就
 
     例如,MATP-with-HEAT没有ZS0和ZS1的png，但有ZS。经过比对,dataset的ZS0和ZS1与MATP-with-HEAT/visualizations/map的ZS一模一样，因此多复制一个ZS0png
 
-1. 运行我更改后的data_pre_run.sh，它会自动读取上面$HOME/recorded_trackfiles/下的所有scenario进行处理，有tqdm进度条，耗时较长，我处理ZS0用了近8分钟
+1. 运行我更改后的data_pre_run.sh，它会自动读取上面$HOME/recorded_trackfiles/下的所有scenario进行处理，有tqdm进度条，开启多线程`num_pros = 8 if True else 1`也耗时非常长，至少几个小时
 
-    输出处理后的文件在~/heatmtp_it_data
+    输出处理后的文件在`~/heatmtp_it_data`下，包含MAP.pt和每个csv转换后的pyg
 
-    >   如果AgTkk画图报错`ImportError: libX11.so.6: cannot open shared object file: No such file or directory`，可以在conda环境安装
-    >
-    >    ```cmd
-    >    sudo pacman -S tk # Arch
-    >    sudo apt install python3-tk # Ubuntu
-    >    ```
+    >   如果AgTkk画图报错`ImportError: libX11.so.6: cannot open shared object file: No such file or directory`，可以在conda环境安装tkagg
 
-2. 
+    说明：
 
+    源代码`np.unique(self.cur_track['frame_id'])[10:-self.fut_len]`的[10:-30]提取会让返回空列表,使得无法生成pyg，何意呢？
+
+2. 我们来对齐一下现在进度
+    
+    现在的文件结构是：
+
+    ```
+    ├── dataset
+    ├── recorded_trackfiles
+    ├── heatmtp_it_data
+    │   ├── DR_CHN_Merging_ZS0
+    │   │   ├── train
+    │   │   │   └── tracks_3501_f1.pyg
+    │   │   └── val
+    │   │   │   └── tracks_3502_f1.pyg
+    │   │   └── MAP.pt
+    │   └── ...
+    ├── MATP-with-HEAT
+    │   ├── INTERPRET_challenge_regular_generalizability_track
+    │   ├── visualizations
+    │   ├── it_all_data_pre.py
+    │   ├── it_all_dataset.py
+    │   ├── ...
+    ```
+    直接运行`it_all_dataset.py`，应该得到的输出样例如下
+    ```text
+    there are 891 data in this dataset
+    tensor([False,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+    True,  True,  True,  True,  True,  True])
+    tensor([False,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True, False,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True])
+    ```
+3. 运行
 
 ---
 

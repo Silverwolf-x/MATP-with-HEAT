@@ -42,7 +42,13 @@ from scipy.ndimage import rotate
 import io
 from torch_geometric.data import Data
 from visualizations import map_vis_xy
+
+
+import warnings
+warnings.filterwarnings("ignore")
 from tqdm import tqdm
+import pdb
+
 class IT_DATA_PRE():
     def __init__(self, tracks=['.'], save_path='.',
                     seg_len=40, gap_len=1, hist_len=10, fut_len=30, map_pad_width=120):
@@ -350,25 +356,25 @@ class IT_DATA_PRE():
 
     def parallel_pre_a_track_file(self, track_num):
         self.set_track(track_num=track_num)
-        frame_numbers = list(set(self.cur_track['frame_id'].values))[10:-self.fut_len]
+        # frame_numbers = np.unique(self.cur_track['frame_id'])[10:-self.fut_len]
+        frame_numbers = np.unique(self.cur_track['frame_id'])
         # print(self.map_img_np.flags['WRITEABLE'])
-        import pdb
-        pdb.set_trace()
-        map_save_path = '/'.join(self.save_path.split('/')[:-0]) + '/MAP.pt'
+        map_save_path = '/'.join(self.save_path.split('/')[:-2]) + '/MAP.pt'
         torch.save(torch.from_numpy(np.copy(self.map_img_np)), map_save_path)
 
         ##############################################################
         ## single-processing
-        for i in frame_numbers:
-            self.process_a_frame(i)
+        # pdb.set_trace()
+        # for i in frame_numbers:
+        #     self.process_a_frame(i)
         #     break
         ##############################################################
 
         ##############################################################
         ## multi-processing
-        # num_pros = 8 if True else 1
-        # with Pool(processes=num_pros) as p:  # , maxtasksperchild=2
-        #     p.map(self.process_a_frame, [i for i in frame_numbers])
+        num_pros = 8 if True else 1
+        with Pool(processes=num_pros) as p:  # , maxtasksperchild=2
+            p.map(self.process_a_frame, [i for i in frame_numbers])
         ##############################################################
     
     def preprocess_all(self):
@@ -381,7 +387,7 @@ def parse_args(cmd_args):
     """ Parse arguments from command line input
     """
     parser = argparse.ArgumentParser(description='data preprocessing parameters')
-    parser.add_argument('-d', '--predata', type=str, default='train', help="the data to preprocess")
+    parser.add_argument('-d', '--predata', type=str, default='val', help="the data to preprocess")
     parser.add_argument('-s', '--scene', type=str, default='DR_CHN_Merging_ZS0', help="the scenario")
     parser.set_defaults(render=False)
     return parser.parse_args(cmd_args)
@@ -404,20 +410,18 @@ if __name__ == '__main__':
     import torch.multiprocessing
     torch.multiprocessing.set_sharing_strategy('file_system')
     
-    from myutils.config import DATASET_DIR
+    from myutils.config import DATASET_DIR,FINAL_DATASET_DIR 
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-    # Parse arguments
     cmd_args = sys.argv[1:]
     cmd_args = parse_args(cmd_args)
 
-    # ALL_TRACK_NAMES = read_all_tracks(split_name=f'/{cmd_args.predata}/', # train val
-    #                                  recorded_path=f'/home/xy/interaction_dataset/recorded_trackfiles/{cmd_args.scene}') # DR_USA_Roundabout_FT
     ALL_TRACK_NAMES = read_all_tracks(split_name=f'/{cmd_args.predata}/', # train val
                                      recorded_path=os.path.join(DATASET_DIR,cmd_args.scene)
-     ) # DR_USA_Roundabout_FT
+     ) 
     
     # SAVE_TO = f'{os.path.join(DATASET_DIR,cmd_args.scene,cmd_args.predata)}/'
-    SAVE_TO = os.path.join(os.path.expanduser("~"),'heatmtp_it_data',cmd_args.scene,cmd_args.predata)
+    SAVE_TO = os.path.join(FINAL_DATASET_DIR,cmd_args.scene,cmd_args.predata)
     SAVE_TO = f'{SAVE_TO}/'
     # f'/home/xy/heatmtp_it_data/{cmd_args.scene}/{cmd_args.predata}/'
 

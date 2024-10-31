@@ -2,8 +2,11 @@ import os
 import os.path as osp
 import time
 import torch
-from torch_geometric.data import Dataset, DataLoader
-
+from torch_geometric.data import Dataset
+from torch_geometric.loader import DataLoader
+import pdb
+import warnings
+warnings.filterwarnings("ignore")
 # data
 class IT_ALL_MTP_dataset(Dataset):
     def __init__(self, data_path='/home/xy/heatmtp_it_data/', scenario_type='Roundabout', data_split='train', hist_gap=1, fut_gap=1):
@@ -26,6 +29,7 @@ class IT_ALL_MTP_dataset(Dataset):
 
         self.data_names=[]
         for s in self.scenario_names:
+            # pdb.set_trace()
             s_d_names = os.listdir(F'{self.data_path}{s}/{self.data_split}')
             s_d_names = ['{}{}/{}/{}'.format(self.data_path, s, self.data_split, d) for d in s_d_names]
             # print(len(s_d_names))
@@ -41,8 +45,8 @@ class IT_ALL_MTP_dataset(Dataset):
         'Generates one sample of data'
         # Select sample
         ID = self.data_names[index]
-        print(f'{ID=}')
-        print(f'{osp.join(self.data_path, ID)=}')
+        # print(f'{ID=}')
+        # print(f'{osp.join(self.data_path, ID)=}')
         data_item = torch.load(osp.join(self.data_path, ID),weights_only=False)
         # tic = time.time()
         data_item.edge_attr = data_item.edge_attr.transpose(0,1)
@@ -56,7 +60,8 @@ class IT_ALL_MTP_dataset(Dataset):
         # data_item.raw_hists = torch.tensor([0])
         # data_item.raw_futs = torch.tensor([0])
 
-        map_name = '{}{}/{}'.format(self.data_path, ID.split('/')[4], 'new_MAP.pt')
+        # map_name = '{}{}/{}'.format(self.data_path, ID.split('/')[4], 'new_MAP.pt')
+        map_name = '{}{}/{}'.format(self.data_path, ID.split('/')[4], 'MAP.pt')
         # print(map_name)
         data_item.map = torch.load(map_name).unsqueeze(dim=0).unsqueeze(dim=0)
         # data_item.map = torch.load('/home/xy/heatmtp_it_data/{}/MAP.pt'.format(ID.split('/')[4]).format()).unsqueeze(dim=0).unsqueeze(dim=0)
@@ -67,11 +72,11 @@ class IT_ALL_MTP_dataset(Dataset):
 if __name__ == '__main__':
     import random
     # dataset = IT_ALL_MTP_dataset(data_path='/home/xy/heatmtp_it_data/', scenario_type='ALL', data_split='val')
-    from myutils.config import DATASET_DIR
-    dataset = IT_ALL_MTP_dataset(data_path=F'{DATASET_DIR}/', scenario_type='ALL', data_split='val')
+    from myutils.config import FINAL_DATASET_DIR
+    dataset = IT_ALL_MTP_dataset(data_path=F'{FINAL_DATASET_DIR}/', scenario_type='ALL', data_split='val')
 
-    print(dataset.__getitem__(random.randint(1, 400)).veh_tar_mask)
     print('there are {} data in this dataset'.format(dataset.__len__()))
+    print(dataset.__getitem__(random.randint(1, 400)).veh_tar_mask)
     loader = DataLoader(dataset, batch_size=2, shuffle=False)
     # # print(dataset.__len__())
     for d in loader:

@@ -6,6 +6,7 @@ import argparse
 import random
 import pickle
 import pprint
+from tkinter.tix import Tree
 import numpy as np
 import torch
 import torch.nn as nn
@@ -25,7 +26,7 @@ import time
 
 def train_a_model(model_to_tr, num_ep=1):
     model_to_tr.train()
-    print(optimizer.state_dict()['param_groups'][0]['lr'])
+    # print(optimizer.state_dict()['param_groups'][0]['lr'])
     train_running_loss = 0.0
     for i, data in enumerate(trainDataloader):
         data.x = data.x[:,:,0:args['input_size']]
@@ -56,7 +57,7 @@ def train_a_model(model_to_tr, num_ep=1):
 def val_a_model(model_to_val):
     model_to_val.eval()
     with torch.no_grad():
-        print('Testing no grad')
+        # print('Testing no grad')
         val_running_loss = 0.0
         for i, data in enumerate(valDataloader):
             data.x = data.x[:,-args['in_length']:,0:args['input_size']]
@@ -69,7 +70,7 @@ def val_a_model(model_to_val):
             val_l = Interaction_TDE_Loss(masked_pred, masked_gt, err_type='ADE')            
             val_running_loss += val_l.item()
 
-    print('validation loss ADE [ {} ]'.format(round(val_running_loss / (i+1), 4)))
+    # print('validation loss ADE [ {} ]'.format(round(val_running_loss / (i+1), 4)))
     return round(val_running_loss / (i+1), 4)
 
 def save_obj_pkl(obj, name):
@@ -83,7 +84,7 @@ if __name__ == '__main__':
         """ Parse arguments from command line input
         """
         parser = argparse.ArgumentParser(description='Training parameters')
-        parser.add_argument('-m', '--modeltype', type=str, default='R', help="the model structure")
+        parser.add_argument('-m', '--modeltype', type=str, default='Heat', help="the model structure")
         parser.add_argument('-g', '--gnn', type=str, default='GAT', help="the GNN to be used")
         parser.add_argument('-r', '--rnn', type=str, default='GRU', help="the RNN to be used")
         parser.add_argument('-d', '--inputsize', type=int, default=4, help="the Number of data to be used")
@@ -103,12 +104,14 @@ if __name__ == '__main__':
     args = {}
     args['run_i'] = cmd_args.number
     args['random_seed'] = 1
-    args['encoder_size'] = 64 
+    # args['encoder_size'] = 64 
+    args['encoder_size'] = 128 
     args['decoder_size'] = 256 
     args['dyn_embedding_size'] = 64 
     args['train_epoches'] = 12
 
-    args['heat_in_channels_node'] = 64
+    # args['heat_in_channels_node'] = 64
+    args['heat_in_channels_node'] = 128
     args['heat_in_channels_edge_attr'] = 5
     args['heat_in_channels_edge_type'] = 6
     args['heat_edge_attr_emb_size'] = 64
@@ -152,10 +155,10 @@ if __name__ == '__main__':
     ## Initialize optimizer 
     optimizer = torch.optim.Adam(train_net.parameters(),lr=0.001) 
     scheduler = MultiStepLR(optimizer, milestones=[1, 2, 4, 6], gamma=0.5)
-
-    full_train_set = IT_ALL_MTP_dataset(data_path='/home/xy/heatmtp_it_data/', 
+    
+    full_train_set = IT_ALL_MTP_dataset(data_path=f'{os.path.expanduser("~")}/heatmtp_it_data/', 
                                         scenario_type='ALL', data_split='train')
-    val_set = IT_ALL_MTP_dataset(data_path='/home/xy/heatmtp_it_data/', 
+    val_set = IT_ALL_MTP_dataset(data_path=f'{os.path.expanduser("~")}/heatmtp_it_data/', 
                                         scenario_type='ALL', data_split='val')
     
     torch.set_num_threads(4)
@@ -166,15 +169,20 @@ if __name__ == '__main__':
     Val_LOSS = []
     Train_LOSS = []
     min_val_loss = 10.0
-    for ep in range(1, args['train_epoches']+1):
+
+    from tqdm import trange
+    pbar = trange(1, args['train_epoches']+1,dynamic_ncols=True)
+    for ep in pbar:
         train_loss_ep = train_a_model(train_net, num_ep=ep)
         val_loss_ep = val_a_model(train_net)
+        pbar.set_postfix({'LR':optimizer.state_dict()['param_groups'][0]['lr'],'train_loss_ep':train_loss_ep,'val_loss_ep':val_loss_ep})
 
         Val_LOSS.append(val_loss_ep)
         Train_LOSS.append(train_loss_ep)
         scheduler.step()
         ## save model
         if val_loss_ep<min_val_loss:
+            os.makedirs('./it_all_models',exist_ok=True)
             save_model_to_PATH = './it_all_models/{}_{}_{}_{}_h{}f{}_d{}_{}.tar'.format(args['date'], args['net_type'], args['gnn_type'], args['enc_rnn_type'], 
                                                                                  args['in_length'], args['out_length'], args['input_size'], args['run_i'])
             torch.save(train_net.state_dict(), save_model_to_PATH)

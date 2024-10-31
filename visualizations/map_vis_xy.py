@@ -8,7 +8,7 @@ import xml.etree.ElementTree as xml
 import pyproj
 import math
 sys.path.append('../python/') 
-from utils import dict_utils
+from .utils import dict_utils
 
 
 class Point:

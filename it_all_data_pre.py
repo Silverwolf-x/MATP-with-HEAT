@@ -36,11 +36,18 @@ import scipy.io as scp
 import numpy as np
 import torch
 from PIL import Image, ImageOps
-from scipy.ndimage.interpolation import rotate
+# from scipy.ndimage.interpolation import rotate
+from scipy.ndimage import rotate
 
 import io
 from torch_geometric.data import Data
 from visualizations import map_vis_xy
+
+
+import warnings
+warnings.filterwarnings("ignore")
+from tqdm import tqdm
+import pdb
 
 class IT_DATA_PRE():
     def __init__(self, tracks=['.'], save_path='.',
@@ -60,16 +67,16 @@ class IT_DATA_PRE():
     def set_track(self, track_num):
         ''' set the csv track file and read the track.csv file '''
         self.cur_track_name = self.tracks[track_num]
-        print('\n')
-        print(self.cur_track_name)
+        # print('\n')
+        # print(self.cur_track_name)
         # print(self.cur_track_name.split('_test.csv')[0])
         self.cur_map_path = './visualizations/osm_maps/{}.osm'.format(self.cur_track_name.split('.csv')[0].split('/')[-4])
-        print('self.cur_map_path', self.cur_map_path)
+        # print('self.cur_map_path', self.cur_map_path)
         self.cur_map_png_path = './visualizations/map_png/{}_map.png'.format(self.cur_track_name.split('.csv')[0].split('/')[-4])
-        print('self.cur_map_png_path', self.cur_map_png_path)
+        # print('self.cur_map_png_path', self.cur_map_png_path)
         self.map_img_np = self.read_img_to_numpy()
 
-        print('map size {}'.format(self.map_img_np.shape))
+        # print('map size {}'.format(self.map_img_np.shape))
 
         # self.padded_map_img_np = self.pad_map_img_in_numpy()
         self.map_limits_n_center = self.plot_map()
@@ -80,7 +87,7 @@ class IT_DATA_PRE():
     def read_track(self):
         """ Read a track.csv file into a pandas dataframe. """
         track_df = pd.read_csv(self.cur_track_name)    
-        print(track_df.head(5))
+        # print(track_df.head(5))
         ### Insert a new column call v_psi_rad
         vx_all = track_df['vx'].values
         vy_all = track_df['vy'].values
@@ -181,7 +188,11 @@ class IT_DATA_PRE():
     def plot_map(self):
         fig, axes = plt.subplots(1, 1)
         # plt.subplots_adjust(wspace=0, hspace=0)/
-        fig.canvas.set_window_title("Interaction Dataset Visualization")
+        import matplotlib
+        # matplotlib.use('Agg')
+        # print(f'{matplotlib.get_backend()=}')
+        # fig.canvas.set_window_title("Interaction Dataset Visualization")
+        fig.canvas.manager.set_window_title("Interaction Dataset Visualization")
         lat_origin, lon_origin = 0. , 0.  # origin is necessary to correctly project the lat lon values in the osm file to the local
         map_vis_xy.draw_map_without_lanelet_xy(self.cur_map_path, axes, lat_origin, lon_origin)
 
@@ -345,28 +356,30 @@ class IT_DATA_PRE():
 
     def parallel_pre_a_track_file(self, track_num):
         self.set_track(track_num=track_num)
-        frame_numbers = list(set(self.cur_track['frame_id'].values))[10:-self.fut_len]
+        # frame_numbers = np.unique(self.cur_track['frame_id'])[10:-self.fut_len]
+        frame_numbers = np.unique(self.cur_track['frame_id'])
         # print(self.map_img_np.flags['WRITEABLE'])
         map_save_path = '/'.join(self.save_path.split('/')[:-2]) + '/MAP.pt'
         torch.save(torch.from_numpy(np.copy(self.map_img_np)), map_save_path)
 
         ##############################################################
         ## single-processing
-        for i in frame_numbers:
-            self.process_a_frame(i)
+        # pdb.set_trace()
+        # for i in frame_numbers:
+        #     self.process_a_frame(i)
         #     break
         ##############################################################
 
         ##############################################################
         ## multi-processing
-        # num_pros = 8 if True else 1
-        # with Pool(processes=num_pros) as p:  # , maxtasksperchild=2
-        #     p.map(self.process_a_frame, [i for i in frame_numbers])
+        num_pros = 8 if True else 1
+        with Pool(processes=num_pros) as p:  # , maxtasksperchild=2
+            p.map(self.process_a_frame, [i for i in frame_numbers])
         ##############################################################
     
     def preprocess_all(self):
-        for i in range(len(self.tracks)):
-            print('processing {}'.format(self.tracks[i]))
+        for i in tqdm(range(len(self.tracks))):
+            # print('processing {}'.format(self.tracks[i]))
             self.parallel_pre_a_track_file(i)
             # break
         
@@ -374,8 +387,8 @@ def parse_args(cmd_args):
     """ Parse arguments from command line input
     """
     parser = argparse.ArgumentParser(description='data preprocessing parameters')
-    parser.add_argument('-d', '--predata', type=str, default='train', help="the data to preprocess")
-    parser.add_argument('-s', '--scene', type=str, default='DR_USA_Roundabout_FT', help="the scenario")
+    parser.add_argument('-d', '--predata', type=str, default='val', help="the data to preprocess")
+    parser.add_argument('-s', '--scene', type=str, default='DR_CHN_Merging_ZS0', help="the scenario")
     parser.set_defaults(render=False)
     return parser.parse_args(cmd_args)
 
@@ -383,29 +396,36 @@ def read_all_tracks(split_name='/train/', recorded_path='/home/xy/interaction_da
     print('reading all tracks for {}...'.format(split_name))
     all_track_names = []
     all_recorded_track_names = os.listdir(recorded_path + split_name + 'sorted/')
-    print(all_recorded_track_names)
+    # print(all_recorded_track_names)
     for track_name in all_recorded_track_names:
         track_path = recorded_path + split_name + 'sorted/'
         all_track_names.append(track_path + track_name)
     print('{} tracks for {}'.format(len(all_track_names), split_name))
-    for i in range(len(all_track_names)):
-        print(i, all_track_names[i])
+    # for i in range(len(all_track_names)):
+    #     print(i, all_track_names[i])
     return all_track_names
 
 if __name__ == '__main__':
     from multiprocessing import Pool
     import torch.multiprocessing
     torch.multiprocessing.set_sharing_strategy('file_system')
-    # Parse arguments
+    
+    from myutils.config import DATASET_DIR,FINAL_DATASET_DIR 
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
     cmd_args = sys.argv[1:]
     cmd_args = parse_args(cmd_args)
 
-    ALL_TRACK_NAMES = read_all_tracks(split_name='/{}/'.format(cmd_args.predata), # train val
-                                     recorded_path='/home/xy/interaction_dataset/recorded_trackfiles/{}'.format(cmd_args.scene)) # DR_USA_Roundabout_FT
+    ALL_TRACK_NAMES = read_all_tracks(split_name=f'/{cmd_args.predata}/', # train val
+                                     recorded_path=os.path.join(DATASET_DIR,cmd_args.scene)
+     ) 
     
-    SAVE_TO = '/home/xy/heatmtp_it_data/{}/{}/'.format(cmd_args.scene, cmd_args.predata)
-    if not os.path.exists(SAVE_TO):
-        os.makedirs(SAVE_TO)
+    # SAVE_TO = f'{os.path.join(DATASET_DIR,cmd_args.scene,cmd_args.predata)}/'
+    SAVE_TO = os.path.join(FINAL_DATASET_DIR,cmd_args.scene,cmd_args.predata)
+    SAVE_TO = f'{SAVE_TO}/'
+    # f'/home/xy/heatmtp_it_data/{cmd_args.scene}/{cmd_args.predata}/'
+
+    os.makedirs(SAVE_TO,exist_ok=True)
 
     DataPRE = IT_DATA_PRE(tracks = ALL_TRACK_NAMES, save_path=SAVE_TO)
     

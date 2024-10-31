@@ -46,7 +46,7 @@ requirements的版本太老了，wheel编译会失败，换用最新的版本就
 3. sorted
 
     ```cmd
-    python -u "/home/sakura/MATP-with-HEAT/myutils/segment_data.py"
+    python -u "myutils/segment_data.py"
     ```
 
     采用default指令的默认设置为block_len=40，gap_len=20，argv_len=0
@@ -73,12 +73,13 @@ requirements的版本太老了，wheel编译会失败，换用最新的版本就
 │   ├── ...
 
 ```
-0. 改名
+0. map对应
+
     在后续处理中，发现map的不对应导致的报错
 
     建议依照`MATP-with-HEAT/visualizations/map_png`更改`dataset/Multi-v1/`csv的名字，或者复制多一份png地图以相互呼应
 
-    例如,MATP-with-HEAT没有ZS0和ZS1的png，但有ZS。经过比对,dataset的ZS0和ZS1与MATP-with-HEAT/visualizations/map的ZS一模一样，因此多复制一个ZS0png
+    例如，ATP-with-HEAT没有ZS0和ZS1的png，但有ZS。经过比对,dataset的ZS0和ZS1与MATP-with-HEAT/visualizations/map的ZS一模一样，因此多复制一个ZS0png
 
 1. 运行我更改后的data_pre_run.sh，它会自动读取上面$HOME/recorded_trackfiles/下的所有scenario进行处理，添加了tqdm进度条，开启多线程`num_pros = 8 if True else 1`也耗时非常长，至少几个小时
 

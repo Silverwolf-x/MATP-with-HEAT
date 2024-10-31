@@ -122,8 +122,17 @@ requirements的版本太老了，wheel编译会失败，换用最新的版本就
             True,  True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True])
     ```
-3. 运行
+3. 运行python it_all_train.py -m Heat，数据成功载入
 
+    剩下的就是model的维数对齐问题了
+
+    - RuntimeError: input.size(-1) must be equal to input_size. Expected 64, got 128
+
+        同步改args['encoder_size']和args['heat_in_channels_node']=128
+
+    输出在./it_all_models输出log和模型
+
+    
 ---
 
 # MATP-with-HEAT

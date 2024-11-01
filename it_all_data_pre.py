@@ -70,9 +70,11 @@ class IT_DATA_PRE():
         # print('\n')
         # print(self.cur_track_name)
         # print(self.cur_track_name.split('_test.csv')[0])
-        self.cur_map_path = './visualizations/osm_maps/{}.osm'.format(self.cur_track_name.split('.csv')[0].split('/')[-4])
+        # pdb.set_trace()
+        self.cur_map_path = './visualizations/osm_maps/{}.osm'.format(self.cur_track_name.split('.csv')[0].split(r"/")[0].split("\\")[-1])
+        
         # print('self.cur_map_path', self.cur_map_path)
-        self.cur_map_png_path = './visualizations/map_png/{}_map.png'.format(self.cur_track_name.split('.csv')[0].split('/')[-4])
+        self.cur_map_png_path = './visualizations/map_png/{}_map.png'.format(self.cur_track_name.split('.csv')[0].split(r"/")[0].split("\\")[-1])
         # print('self.cur_map_png_path', self.cur_map_png_path)
         self.map_img_np = self.read_img_to_numpy()
 
@@ -365,16 +367,16 @@ class IT_DATA_PRE():
         ##############################################################
         ## single-processing
         # pdb.set_trace()
-        # for i in frame_numbers:
-        #     self.process_a_frame(i)
+        for i in frame_numbers:
+            self.process_a_frame(i)
         #     break
         ##############################################################
 
         ##############################################################
         ## multi-processing
-        num_pros = 8 if True else 1
-        with Pool(processes=num_pros) as p:  # , maxtasksperchild=2
-            p.map(self.process_a_frame, [i for i in frame_numbers])
+        # num_pros = 8 if True else 1
+        # with Pool(processes=num_pros) as p:  # , maxtasksperchild=2
+        #     p.map(self.process_a_frame, [i for i in frame_numbers])
         ##############################################################
     
     def preprocess_all(self):

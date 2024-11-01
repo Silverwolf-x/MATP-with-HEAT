@@ -1,6 +1,7 @@
 import os
 import os.path as osp
 import time
+from matplotlib.font_manager import ttfFontProperty
 import torch
 from torch_geometric.data import Dataset
 from torch_geometric.loader import DataLoader
@@ -45,7 +46,6 @@ class IT_ALL_MTP_dataset(Dataset):
         'Generates one sample of data'
         # Select sample
         ID = self.data_names[index]
-        # print(f'{ID=}')
         # print(f'{osp.join(self.data_path, ID)=}')
         data_item = torch.load(osp.join(self.data_path, ID),weights_only=False)
         # tic = time.time()
@@ -61,7 +61,7 @@ class IT_ALL_MTP_dataset(Dataset):
         # data_item.raw_futs = torch.tensor([0])
 
         # map_name = '{}{}/{}'.format(self.data_path, ID.split('/')[4], 'new_MAP.pt')
-        map_name = '{}{}/{}'.format(self.data_path, ID.split('/')[4], 'MAP.pt')
+        map_name = '{}{}/{}'.format(self.data_path, ID.split('/')[-3], 'MAP.pt')
         # print(map_name)
         data_item.map = torch.load(map_name).unsqueeze(dim=0).unsqueeze(dim=0)
         # data_item.map = torch.load('/home/xy/heatmtp_it_data/{}/MAP.pt'.format(ID.split('/')[4]).format()).unsqueeze(dim=0).unsqueeze(dim=0)

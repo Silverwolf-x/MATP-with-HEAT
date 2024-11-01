@@ -48,6 +48,8 @@ import warnings
 warnings.filterwarnings("ignore")
 from tqdm import tqdm
 import pdb
+from myutils.config import ROOT
+from pathlib import Path
 
 class IT_DATA_PRE():
     def __init__(self, tracks=['.'], save_path='.',
@@ -67,14 +69,13 @@ class IT_DATA_PRE():
     def set_track(self, track_num):
         ''' set the csv track file and read the track.csv file '''
         self.cur_track_name = self.tracks[track_num]
-        # print('\n')
-        # print(self.cur_track_name)
-        # print(self.cur_track_name.split('_test.csv')[0])
         # pdb.set_trace()
-        self.cur_map_path = './visualizations/osm_maps/{}.osm'.format(self.cur_track_name.split('.csv')[0].split(r"/")[0].split("\\")[-1])
+        target = Path(self.cur_track_name).parts[-4]  # 取'D:\\recorded_trackfiles\\DR_CHN_Merging_ZS0\\val\\sorted\\tracks_1.csv'倒数第三个部分
+        
+        self.cur_map_path = os.path.join(ROOT,'MATP-with-HEAT','visualizations','osm_maps',f'{target}.osm')
         
         # print('self.cur_map_path', self.cur_map_path)
-        self.cur_map_png_path = './visualizations/map_png/{}_map.png'.format(self.cur_track_name.split('.csv')[0].split(r"/")[0].split("\\")[-1])
+        self.cur_map_png_path = os.path.join(ROOT,'MATP-with-HEAT','visualizations','map_png',f'{target}_map.png')
         # print('self.cur_map_png_path', self.cur_map_png_path)
         self.map_img_np = self.read_img_to_numpy()
 
@@ -348,7 +349,8 @@ class IT_DATA_PRE():
                         raw_hists=Raw_hist, raw_futs=Raw_fut)
 
         if torch.sum(Veh_Tar_Mask)>1:
-            pyg_data_name = '{}{}_f{}.pyg'.format(self.save_path, self.cur_track_name.split('.csv')[0].split('/')[-1], cur_frm_id)
+            # pdb.set_trace()
+            pyg_data_name =  os.path.join(self.save_path,f'{Path(self.cur_track_name).stem}_f{cur_frm_id}.pyg')
             torch.save(pyg_data, pyg_data_name)
         return Nodes_f, Edges, Edges_type, Edges_attr, Fut_GT, Tar_Mask, Veh_Tar_Mask, Raw_hist, Raw_fut
 
@@ -361,7 +363,8 @@ class IT_DATA_PRE():
         # frame_numbers = np.unique(self.cur_track['frame_id'])[10:-self.fut_len]
         frame_numbers = np.unique(self.cur_track['frame_id'])
         # print(self.map_img_np.flags['WRITEABLE'])
-        map_save_path = '/'.join(self.save_path.split('/')[:-2]) + '/MAP.pt'
+        map_save_path = os.path.join(Path(self.save_path).parent,'MAP.pt')
+        # pdb.set_trace()
         torch.save(torch.from_numpy(np.copy(self.map_img_np)), map_save_path)
 
         ##############################################################
@@ -397,11 +400,12 @@ def parse_args(cmd_args):
 def read_all_tracks(split_name='/train/', recorded_path='/home/xy/interaction_dataset/recorded_trackfiles/'):
     print('reading all tracks for {}...'.format(split_name))
     all_track_names = []
-    all_recorded_track_names = os.listdir(recorded_path + split_name + 'sorted/')
+    track_path = os.path.join(recorded_path,split_name,'sorted')
+    # pdb.set_trace()
+    all_recorded_track_names = os.listdir(track_path+os.path.sep)
     # print(all_recorded_track_names)
     for track_name in all_recorded_track_names:
-        track_path = recorded_path + split_name + 'sorted/'
-        all_track_names.append(track_path + track_name)
+        all_track_names.append(os.path.join(track_path , track_name))
     print('{} tracks for {}'.format(len(all_track_names), split_name))
     # for i in range(len(all_track_names)):
     #     print(i, all_track_names[i])
@@ -418,13 +422,11 @@ if __name__ == '__main__':
     cmd_args = sys.argv[1:]
     cmd_args = parse_args(cmd_args)
 
-    ALL_TRACK_NAMES = read_all_tracks(split_name=f'/{cmd_args.predata}/', # train val
-                                     recorded_path=os.path.join(DATASET_DIR,cmd_args.scene)
+    ALL_TRACK_NAMES = read_all_tracks(split_name= cmd_args.predata, # train val
+                                     recorded_path= os.path.join(DATASET_DIR,cmd_args.scene)
      ) 
-    
-    # SAVE_TO = f'{os.path.join(DATASET_DIR,cmd_args.scene,cmd_args.predata)}/'
-    SAVE_TO = os.path.join(FINAL_DATASET_DIR,cmd_args.scene,cmd_args.predata)
-    SAVE_TO = f'{SAVE_TO}/'
+
+    SAVE_TO = os.path.join(FINAL_DATASET_DIR,cmd_args.scene,cmd_args.predata)+os.path.sep
     # f'/home/xy/heatmtp_it_data/{cmd_args.scene}/{cmd_args.predata}/'
 
     os.makedirs(SAVE_TO,exist_ok=True)

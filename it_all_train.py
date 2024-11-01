@@ -22,7 +22,7 @@ from it_heat_gir_model import IT_HeatIR_Net
 from it_all_dataset import IT_ALL_MTP_dataset
 
 import time
-
+from myutils.config import ROOT, FINAL_DATASET_DIR
 
 def train_a_model(model_to_tr, num_ep=1):
     model_to_tr.train()
@@ -156,9 +156,9 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(train_net.parameters(),lr=0.001) 
     scheduler = MultiStepLR(optimizer, milestones=[1, 2, 4, 6], gamma=0.5)
     
-    full_train_set = IT_ALL_MTP_dataset(data_path=f'{os.path.expanduser("~")}/heatmtp_it_data/', 
+    full_train_set = IT_ALL_MTP_dataset(data_path=FINAL_DATASET_DIR, 
                                         scenario_type='ALL', data_split='train')
-    val_set = IT_ALL_MTP_dataset(data_path=f'{os.path.expanduser("~")}/heatmtp_it_data/', 
+    val_set = IT_ALL_MTP_dataset(data_path=FINAL_DATASET_DIR,
                                         scenario_type='ALL', data_split='val')
     
     torch.set_num_threads(4)

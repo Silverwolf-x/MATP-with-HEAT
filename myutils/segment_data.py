@@ -4,7 +4,7 @@ import csv
 sys.path.append("..")
 from INTERPRET_challenge_regular_generalizability_track.utils import time_rearrange
 from INTERPRET_challenge_regular_generalizability_track.utils import segmentation
-
+import pdb
 
 default_header = ['track_id', 'frame_id', 'timestamp_ms', 'agent_type', 'x', 'y', 'vx', 'vy', 'psi_rad', 'length', 'width']
 
@@ -63,6 +63,7 @@ def csv_header_check(csv_file_path):
 def main(command='default', file_path='', block_len=40, gap_between_seg=20, argc=0):
 
     if command.lower() == 'default':
+        # pdb.set_trace()
         data_dir_list = [f.path for f in os.scandir(file_path) if (f.is_dir() and f.name[0:2]=='DR')]
         if len(data_dir_list) == 0:
             print("ERROR: Cannot find folder starting with DR_ under the given path\n")
@@ -145,7 +146,6 @@ def main(command='default', file_path='', block_len=40, gap_between_seg=20, argc
 if __name__ == '__main__':
     # 采用default指令的默认设置为block_len，gap_len，argv_len
     command = 'default' or sys.argv[1]
-    # sys.path.append("MATP-with-HEAT")
     
     from config import DATASET_DIR
 

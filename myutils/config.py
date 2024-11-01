@@ -1,5 +1,7 @@
 import os
-DIR='dataset/Multi-v1'
-PRE_DATASET_DIR = os.path.join(os.path.expanduser("~"),DIR)
-DATASET_DIR = os.path.join(os.path.expanduser("~"),'recorded_trackfiles')
-FINAL_DATASET_DIR = os.path.join(os.path.expanduser("~"),'heatmtp_it_data')
+ROOT = 'D:\\'
+DATASET='Multi-v1'
+
+PRE_DATASET_DIR = os.path.join(ROOT,'dataset',DATASET)
+DATASET_DIR = os.path.join(ROOT,'recorded_trackfiles')
+FINAL_DATASET_DIR = os.path.join(ROOT,'heatmtp_it_data')

@@ -120,11 +120,13 @@ target_case_name = None # 全部处理
 
 - 目标：尝试使用部分pyg运行，看到训练进度条就是胜利
 - 注释：如果使用其他模型，可能需要更改`args['encoder_size']`和`args['heat_in_channels_node']`=128
-- 输入（运行时自动输入）：ROOT\recorded_trackfiles下所有csv
+- 输入（运行时自动输入）：ROOT\heatmtp_it_data下所有pkg
 - 运行：`MATP-with-HEAT\it_all_dataset.py`
 - 输出：输出log和模型在`MATP-with-HEAT\it_all_models`文件夹
 
-![](myutils\finish.jpg)
+<p align="center">
+<img src=".\myutils\finish.jpg">
+</p>
 
 
 ---
